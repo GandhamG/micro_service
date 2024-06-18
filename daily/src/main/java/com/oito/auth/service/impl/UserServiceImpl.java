@@ -47,7 +47,6 @@ import com.oito.auth.common.to.SimpleResponse;
 import com.oito.auth.common.to.Status;
 import com.oito.auth.common.to.UserIdentifierSearchRequest;
 import com.oito.auth.common.to.UserListRequest;
-import com.oito.auth.common.to.UserLoginAttemptVO;
 import com.oito.auth.common.to.UserLoginHistoryBean;
 import com.oito.auth.common.to.UserLoginRequest;
 import com.oito.auth.common.to.UserSignUpRequest;
@@ -1416,10 +1415,5 @@ public class UserServiceImpl implements UserService {
 	public List<AppUserTO> searchUserByPrivilege(final String privilegeCode, final String accessCode) {
 		userContextService.verifyAdminAccess();
 		return userDAO.findUserByPrivilege(privilegeCode, accessCode);
-	}
-
-	@Override
-	public UserLoginAttemptVO executeLoginAttempts(final UserLoginAttemptVO loginAttemptVO) {
-		return userDAO.executeLoginAttempts(loginAttemptVO);
 	}
 }

@@ -14,7 +14,6 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
@@ -32,22 +31,16 @@ import com.oito.auth.common.to.ListResponse;
 import com.oito.auth.common.to.SocialLoginRequest;
 import com.oito.auth.common.to.UserIdentifierSearchRequest;
 import com.oito.auth.common.to.UserListRequest;
-import com.oito.auth.common.to.UserLoginAttemptVO;
 import com.oito.auth.common.to.UserStatus;
 import com.oito.auth.common.to.UserTypeTO;
 import com.oito.auth.dao.UserDAO;
 import com.oito.auth.dao.repository.EmailUpdateHistoryRepository;
-import com.oito.auth.dao.repository.UserLoginAttemptRepository;
 import com.oito.auth.dao.repository.UserRepository;
 import com.oito.auth.dao.repository.UserTypeRepository;
 import com.oito.auth.data.EmailUpdateHistory;
-import com.oito.auth.data.LoginAttempt;
 import com.oito.auth.data.User;
 import com.oito.auth.data.UserType;
-import com.oito.auth.exception.AuthException;
-import com.oito.auth.exception.errorcode.AuthErrorCode;
 import com.oito.auth.mapper.AppUserToUserMapper;
-import com.oito.auth.mapper.LoginAttemptVoToLoginAttemptMapper;
 import com.oito.auth.mapper.UserTypeMapper;
 import com.oito.auth.util.UserUtils;
 import com.oito.common.usercontext.UserContextStore;
@@ -75,18 +68,6 @@ public class UserDAOImpl implements UserDAO {
 
 	@Autowired
 	private UserContextStore userContextStore;
-
-	@Autowired
-	private UserLoginAttemptRepository loginAttemptRepo;
-
-	@Autowired
-	private LoginAttemptVoToLoginAttemptMapper loginAttemptMapper;
-
-	@Value("${oito.login.max-attempts: 10}")
-	private Integer maxAttempts;
-
-	@Value("${oito.login.exceeds-minutes: 30}")
-	private Integer exceedsMinutes;
 
 	@Override
 	public List<AppUserTO> filterUserByMetadata(final String code, final String value) {
@@ -326,35 +307,6 @@ public class UserDAOImpl implements UserDAO {
 	@Override
 	public List<AppUserTO> findUserByPrivilege(final String privilegeCode, final String accessCode) {
 		return toVOList(userRepository.findUserByPrivilege(privilegeCode, accessCode));
-	}
-
-	@Override
-	public UserLoginAttemptVO executeLoginAttempts(final UserLoginAttemptVO loginAttemptVO) {
-		Optional<LoginAttempt> loginAttempt;
-		if (null != loginAttemptVO.getPhoneNo()) {
-			loginAttempt = loginAttemptRepo.findByPhoneNo(loginAttemptVO.getPhoneNo());
-		} else {
-			loginAttempt = loginAttemptRepo.findByUseremail(loginAttemptVO.getUseremail());
-		}
-		if (loginAttempt.isPresent()) {
-			final var loginAttemptEntity = loginAttempt.get();
-			final var totalLoginAttempts = loginAttemptEntity.getAttempts();
-			if (totalLoginAttempts.intValue() >= maxAttempts.intValue()) {
-				throw new AuthException(AuthErrorCode.LOGIN_LIMIT_EXCEEDS);
-			}
-			loginAttemptEntity.setLastModified(LocalDateTime.now().plusMinutes(exceedsMinutes.intValue()));
-			loginAttemptEntity.setAttempts(totalLoginAttempts + 1);
-			final UserLoginAttemptVO vo = loginAttemptMapper.toVO(loginAttemptRepo.save(loginAttemptEntity));
-			vo.setStatus("updated");
-			return vo;
-		}
-
-		loginAttemptVO.setLastModified(LocalDateTime.now());
-		final UserLoginAttemptVO vo = loginAttemptMapper
-				.toVO(loginAttemptRepo.save(loginAttemptMapper.toEntity(loginAttemptVO)));
-		vo.setStatus("saved");
-		return vo;
-
 	}
 
 }

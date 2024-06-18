@@ -102,7 +102,6 @@ public enum AuthErrorCode implements BaseCode {
 	MULTIPLE_REFRESH_TOKENS_FOUND("MULTIPLE_REFRESH_TOKENS_FOUND", "Multiple refersh token found for same user"),
 	REFRESH_TOKEN_ALREADY_EXISTS_FOR_MAC_AND_TOKEN_TYPE("REFRESH_TOKEN_ALREADY_EXISTS_FOR_MAC_AND_TOKEN_TYPE",
 			"Cannot create token as same token already exists for same macid and tokentype"),
-	LOGIN_LIMIT_EXCEEDS("LOGIN_LIMIT_EXCEEDS", "Logn limit exceeds please try after 30 minutes"),
 	OTP_NOT_FOUND("OTP_NOT_FOUND", "OTP not found for phone or email"),
 	PARTNER_DETAILS_MISSING("PARTNER_DETAILS_MISSING", "Client-Id/Secret-Key missing"),
 	PARTNER_NOT_FOUND("PARTNER_NOT_FOUND", "Partner details not found in database");

@@ -14,7 +14,6 @@ import com.oito.auth.common.to.ListResponse;
 import com.oito.auth.common.to.SocialLoginRequest;
 import com.oito.auth.common.to.UserIdentifierSearchRequest;
 import com.oito.auth.common.to.UserListRequest;
-import com.oito.auth.common.to.UserLoginAttemptVO;
 import com.oito.auth.common.to.UserStatus;
 import com.oito.auth.common.to.UserTypeTO;
 import com.oito.auth.data.User;
@@ -77,7 +76,4 @@ public interface UserDAO {
 	List<AppUserTO> filterUserByMetadata(String code, String value);
 
 	List<AppUserTO> findUserByPrivilege(String privilegeCode, String accessCode);
-
-	UserLoginAttemptVO executeLoginAttempts(UserLoginAttemptVO loginAttemptVO);
-
 }

@@ -27,7 +27,6 @@ import com.oito.auth.common.Constants;
 import com.oito.auth.common.to.AppUserTO;
 import com.oito.auth.common.to.OTPPhoneVerificationRequest;
 import com.oito.auth.common.to.StaySignedInRequest;
-import com.oito.auth.common.to.UserLoginAttemptVO;
 import com.oito.auth.common.to.UserLoginRequest;
 import com.oito.auth.common.to.UserStatus;
 import com.oito.auth.dao.PrivilegeDAO;
@@ -86,13 +85,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	@Autowired
 	private UserService userService;
-
+	
 	@Autowired
 	private ClientService clientService;
 
 	@Autowired
 	private UserDAO userDao;
-
+	
 	@Autowired
 	private JWETokenHandler jweTokenHandler;
 
@@ -149,11 +148,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		userValidator.populateUserWarnings(userTO, isEmailChanged);
 		return userTO;
 	}
-
+	
 	@Override
 	@Transactional
-	public AppUserTO authenticateUsernamePasswordWithPartner(final UserLoginRequest loginRequest,
-			final String sessionId, final boolean enforceVerification) {
+	public AppUserTO authenticateUsernamePasswordWithPartner(final UserLoginRequest loginRequest, final String sessionId,
+			final boolean enforceVerification) {
 		userService.populatePhoneNumber(loginRequest);
 		userValidator.validateLoginRequest(loginRequest);
 		final var isEmailChanged = replaceFirstNonASCIICharacterInEmail(loginRequest);
@@ -168,7 +167,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		if (StringUtils.isNotBlank(userTO.getError())) {
 			return userTO;
 		}
-
+		
 		userTO.setCustomFields(fetchCustomFieldsForClient(loginRequest.getClientId(), loginRequest.getSecretKey()));
 		userTO.setStaySignedIn(BooleanUtils.toBoolean(loginRequest.getStaySignedIn()));
 		userTO.setUserType(loginRequest.getUserType());
@@ -178,26 +177,26 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		userValidator.populateUserWarnings(userTO, isEmailChanged);
 		return userTO;
 	}
-
+	
 	@Override
 	@Transactional
 	public AppUserTO authenticateClientGuestLogin(final UserLoginRequest loginRequest) {
 		final var userTO = AppUserTO.empty();
 		userTO.setCustomFields(fetchCustomFieldsForClient(loginRequest.getClientId(), loginRequest.getSecretKey()));
 		populateExpiryTime(userTO.getCustomFields());
-		generateAccessToken(userTO, TokenType.GUEST, AuthUserType.BUYER, userTO.getCustomFields(), List.of(),
-				Instant.now().plus(customExpiryInDays, ChronoUnit.DAYS));
+		generateAccessToken(userTO, TokenType.GUEST, AuthUserType.BUYER,
+				userTO.getCustomFields(), List.of(), Instant.now().plus(customExpiryInDays, ChronoUnit.DAYS));
 		return userTO;
 	}
-
+	
 	private void populateExpiryTime(final Map<String, String> customFields) {
 		customFields.put("expiryTime", Long.toString(Instant.now().plus(1, ChronoUnit.DAYS).toEpochMilli()));
 	}
-
-	private Map<String, String> fetchCustomFieldsForClient(final String clientID, final String secretKey) {
+	
+	private Map<String, String> fetchCustomFieldsForClient(String clientID, String secretKey) {
 		log.info("Custom Fields fetch with Client ID : {}", clientID);
 		final var user = clientService.validateClientCredentials(clientID, secretKey);
-
+		
 		return metadataService.findUserMetadataMap(user.getUserId());
 	}
 
@@ -345,10 +344,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	private void validateUserSecretHash(final AppUserTO userTO, final String password) {
 		if (null == userTO.getUserSecretHash() || !userService.matchPassword(password, userTO.getUserSecretHash())) {
-			final var loginAttemptVO = new UserLoginAttemptVO();
-			loginAttemptVO.setUseremail(userTO.getUseremail());
-			loginAttemptVO.setPhoneNo(userTO.getPhoneNo());
-			userDao.executeLoginAttempts(loginAttemptVO);
 			throw new AuthException(AuthErrorCode.IDP_API_EXCEPTION);
 		}
 		log.info("Internal user validation completed: {}", userTO.getUseremail());
@@ -367,10 +362,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	private void generateAccessToken(final AppUserTO userTo, final AuthUserType userType) {
 		if (userTo.getStaySignedIn().booleanValue()) {
 			generateStaySignedInAccessToken(userTo, userType);
-		} else if (MapUtils.isEmpty(userTo.getCustomFields())) {
-			generateAccessToken(userTo, TokenType.USER, userType, new HashMap<>());
 		} else {
-			generateAccessToken(userTo, TokenType.USER, userType, userTo.getCustomFields());
+			if (MapUtils.isEmpty(userTo.getCustomFields())) {
+				generateAccessToken(userTo, TokenType.USER, userType, new HashMap<>());
+			} else {
+				generateAccessToken(userTo, TokenType.USER, userType, userTo.getCustomFields());
+			}
 		}
 	}
 

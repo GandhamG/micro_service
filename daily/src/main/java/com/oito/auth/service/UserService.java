@@ -23,7 +23,6 @@ import com.oito.auth.common.to.SignUpResponse;
 import com.oito.auth.common.to.SimpleResponse;
 import com.oito.auth.common.to.UserIdentifierSearchRequest;
 import com.oito.auth.common.to.UserListRequest;
-import com.oito.auth.common.to.UserLoginAttemptVO;
 import com.oito.auth.common.to.UserLoginRequest;
 import com.oito.auth.common.to.UserSignUpRequest;
 import com.oito.auth.common.to.UserStatus;
@@ -166,7 +165,5 @@ public interface UserService {
 	Optional<Map<String, String>> getUserOtpByEmailOrPhone(final String value);
 
 	List<AppUserTO> searchUserByPrivilege(final String privilegeCode, final String accessCode);
-
-	UserLoginAttemptVO executeLoginAttempts(UserLoginAttemptVO loginAttemptVO);
 
 }

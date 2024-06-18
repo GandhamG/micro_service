@@ -16,7 +16,6 @@ import com.oito.auth.common.to.AppUserTO;
 import com.oito.auth.common.to.OTPPhoneVerificationRequest;
 import com.oito.auth.common.to.SimpleResponse;
 import com.oito.auth.common.to.StaySignedInRequest;
-import com.oito.auth.common.to.UserLoginAttemptVO;
 import com.oito.auth.common.to.UserLoginRequest;
 import com.oito.auth.exception.AuthException;
 import com.oito.auth.exception.errorcode.AuthErrorCode;
@@ -58,14 +57,14 @@ public class AuthLoginController {
 			@RequestHeader("SESSION") final String sessionId) {
 		return executeLogin(requestdata, sessionId, true);
 	}
-
+	
 	@PostMapping("login/partner")
 	@ApiOperation(value = "Authenticate users with partner", nickname = "loginPartner", code = 200, httpMethod = "POST", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public AppUserTO partnerLogin(@RequestBody final UserLoginRequest requestdata,
 			@RequestHeader("SESSION") final String sessionId) {
 		return executePartnerLogin(requestdata, sessionId, true);
 	}
-
+	
 	@PostMapping("guestlogin/client")
 	@ApiOperation(value = "Fetch client details for guest", nickname = "guestloginClient", code = 200, httpMethod = "POST", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public AppUserTO clientGuestLogin(@RequestBody final UserLoginRequest requestdata) {
@@ -115,18 +114,15 @@ public class AuthLoginController {
 			return formErrorTO(e, AuthErrorCode.UNKNOWN_EXCEPTION);
 		}
 	}
-
+	
 	private AppUserTO executePartnerLogin(final UserLoginRequest requestdata, final String sessionId,
 			final boolean enforceVerification) {
-		log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$Authentication service login with Partner requested for the user {}",
-				requestdata);
-		return authenticationService.authenticateUsernamePasswordWithPartner(requestdata, sessionId,
-				enforceVerification);
+		log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$Authentication service login with Partner requested for the user {}", requestdata);
+		return authenticationService.authenticateUsernamePasswordWithPartner(requestdata, sessionId, enforceVerification);
 	}
-
+	
 	private AppUserTO executeClientGuestLogin(final UserLoginRequest requestdata) {
-		log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$Authentication service Guest login with Client requested for {}",
-				requestdata);
+		log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$Authentication service Guest login with Client requested for {}", requestdata);
 		return authenticationService.authenticateClientGuestLogin(requestdata);
 	}
 
@@ -156,11 +152,6 @@ public class AuthLoginController {
 			@RequestHeader("userId") final Long userId,
 			@RequestHeader(HttpHeaders.AUTHORIZATION) final String accessToken) {
 		return userService.logOut(sessionId, userId, accessToken);
-	}
-
-	@PostMapping("login_attempts")
-	public UserLoginAttemptVO loginAttempts(@RequestBody final UserLoginAttemptVO loginAttemptVO) {
-		return userService.executeLoginAttempts(loginAttemptVO);
 	}
 
 }
