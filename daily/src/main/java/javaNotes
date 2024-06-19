@@ -1,0 +1,12 @@
+How JVM Works – JVM Architecture?
+url: https://www.lenovo.com/in/en/glossary/jvm/?orgRef=https%253A%252F%252Fwww.google.com%252F
+  1. JVM(Java Virtual Machine) acts as a run-time engine to run Java applications.
+  2. It provides a runtime environment for Java applications to run on different platforms and operating systems.
+  3. one of the main advantages of JVM is its platform independence.
+  4. JVM supports dynamic class loading and unloading. It provides application programming interfaces (APIs) such as ClassLoader that allow classes to be loaded dynamically at runtime. 
+ What it does?
+   The JVM performs following operation:
+     Loads code 
+     Verifies code
+     Executes code
+     Provides runtime environment
